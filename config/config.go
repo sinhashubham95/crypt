@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 
 	"github.com/bketelsen/crypt/backend"
+	"github.com/bketelsen/crypt/backend/appconfig"
 	"github.com/bketelsen/crypt/backend/consul"
 	"github.com/bketelsen/crypt/backend/etcd"
 	"github.com/bketelsen/crypt/backend/firestore"
@@ -47,6 +48,15 @@ func NewConfigManager(client backend.Store, keystore io.Reader) (ConfigManager, 
 	return configManager{bytes, client}, nil
 }
 
+// NewStandardAppConfigManager returns a new ConfigManager backed by AWS App Config.
+func NewStandardAppConfigManager(machines []string) (ConfigManager, error) {
+	store, err := appconfig.New(machines)
+	if err != nil {
+		return nil, err
+	}
+	return NewStandardConfigManager(store)
+}
+
 // NewStandardFirestoreConfigManager returns a new ConfigManager backed by Firestore.
 func NewStandardFirestoreConfigManager(machines []string) (ConfigManager, error) {
 	store, err := firestore.New(machines)
@@ -73,6 +83,16 @@ func NewStandardConsulConfigManager(machines []string) (ConfigManager, error) {
 		return nil, err
 	}
 	return NewStandardConfigManager(store)
+}
+
+// NewAppConfigManager returns a new ConfigManager backed by AWS App Config.
+// Data will be encrypted.
+func NewAppConfigManager(machines []string, keystore io.Reader) (ConfigManager, error) {
+	store, err := appconfig.New(machines)
+	if err != nil {
+		return nil, err
+	}
+	return NewConfigManager(store, keystore)
 }
 
 // NewFirestoreConfigManager returns a new ConfigManager backed by Firestore.
