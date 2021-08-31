@@ -9,7 +9,6 @@ package http2
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"net/http"
 	"sync"
 )
@@ -302,7 +301,7 @@ func shouldRetryDial(call *dialCall, req *http.Request) bool {
 		// from this request.
 		return false
 	}
-	if !errors.Is(call.err, context.Canceled) && !errors.Is(call.err, context.DeadlineExceeded) {
+	if !(call.err == context.Canceled) && !(call.err == context.DeadlineExceeded) {
 		// If the call error is not because of a context cancellation or a deadline expiry,
 		// the dial should not be retried.
 		return false
